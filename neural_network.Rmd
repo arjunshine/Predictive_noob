@@ -1,0 +1,79 @@
+---
+title: "Prediction_Neural_network"
+author: "Arjun_Shine"
+date: "19 October 2019"
+output: html_document
+---
+Load the required libraries and data set
+NOTE : The below given code is for predicting the strength of cement strength
+So the factors for model bulding is based on that.
+```{r}
+library(neuralnet)
+
+concrete<-read.csv("Input file path")
+str(concrete)
+```
+#Normalize data
+
+```{r}
+normalize <- function(x){return((x - min(x)) / (max(x) - min(x)))}
+```
+#Apply normaliztion to all columns
+Head and Summary of the data
+```{r}
+concrete_norm <- as.data.frame(lapply(concrete, normalize))
+head(concrete_norm)
+summary(concrete_norm)
+```
+#Create train and test datasets
+
+```{r}
+set.seed(123)
+concrete_train <- concrete_norm[1:773,]
+concrete_test <- concrete_norm[774:1030,]
+
+names(concrete_norm)
+```
+#Train the model and predict
+
+```{r}
+model_concrete<-neuralnet(strength~Cement+blastfurnaceslag+fly_ash+water+superplasticizer+coarse_aggregate+fine_aggregate+age,data=concrete_train,hidden=1)
+predict_hidden1<-compute(model_concrete,concrete_test[-9])
+predict_hidden1$net.result
+```
+
+#plotting the model
+
+```{r}
+plot(model_concrete)
+summary(model_concrete)
+```
+
+
+# write into a new file
+```{r}
+write.csv(concrete_train,"OUTPUT PATH")
+
+```
+
+
+```{r}
+plot(model_concrete)
+summary(model_concrete)
+```
+
+correlation 
+
+```{r}
+cor(predict_hidden1$net.result,concrete_test$strength)
+```
+
+#Model improvement
+
+```{r}
+model_concrete_improved<-neuralnet(strength~Cement+blastfurnaceslag+fly_ash+water+superplasticizer+coarse_aggregate+fine_aggregate+age,data=concrete_train,hidden=5)
+plot(model_concrete_improved)
+predict_hidden5<-compute(model_concrete_improved,concrete_test[-9])
+cor(predict_hidden5$net.result,concrete_test$strength)
+```
+
